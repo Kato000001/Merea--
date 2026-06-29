@@ -1,0 +1,39 @@
+/* Custom scrollbar matching dark theme */
+body {
+    scrollbar-width: thin;
+    scrollbar-color: #888888 #4D4D4D;
+}
+
+/* Chrome, Safari, Opera */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #4D4D4D;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888888;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #aaaaaa;
+}
+
+/* Disable mobile tap highlight */
+.board-card {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Input layout tweak for inline renaming */
+.inline-rename-input {
+    background: #F3F4F6;
+    color: #1f2937;
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.37rem;
+    font-size: 0.875rem;
+    width: 80%;
+    outline: none;
+}
