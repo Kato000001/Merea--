@@ -155,6 +155,65 @@ document.addEventListener('DOMContentLoaded', () => {
             DOM.kebabDropdown.classList.add('hidden');
         }
     });
+// --- ケバブメニュー（リネーム・複製・削除はまだDB未対応） ---
+    function openKebabMenu(e, boardId) {
+        activeBoardId = boardId;
+        const rect = e.currentTarget.getBoundingClientRect();
+        DOM.kebabDropdown.style.top = `${window.scrollY + rect.bottom + 5}px`;
+        DOM.kebabDropdown.style.left = `${window.scrollX + rect.left - 120}px`;
+        DOM.kebabDropdown.classList.remove('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!DOM.kebabDropdown.contains(e.target)) {
+            DOM.kebabDropdown.classList.add('hidden');
+        }
+    });
+
+    // --- ここから追加 ---
+
+    // --- 削除モーダルを開く ---
+    DOM.menuDelete.addEventListener('click', () => {
+        DOM.kebabDropdown.classList.add('hidden');
+        if (!activeBoardId) return;
+        DOM.deleteModal.classList.remove('hidden');
+    });
+
+    const closeDeleteModal = () => DOM.deleteModal.classList.add('hidden');
+    DOM.deleteCancelBtn.addEventListener('click', closeDeleteModal);
+    DOM.deleteModal.addEventListener('click', (e) => {
+        if (e.target === DOM.deleteModal) closeDeleteModal();
+    });
+
+    // --- 削除を確定（DBに削除リクエストを送る） ---
+    DOM.deleteConfirmBtn.addEventListener('click', async () => {
+        if (!activeBoardId) {
+            closeDeleteModal();
+            return;
+        }
+
+        try {
+            const res = await fetch('php/boards_delete.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: activeBoardId })
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            boards = boards.filter(b => b.id !== activeBoardId);
+            renderBoards(DOM.searchInput.value);
+        } catch (err) {
+            console.error('ボード削除エラー:', err);
+        } finally {
+            closeDeleteModal();
+        }
+    });
+
 
     // --- 初期実行：DBから一覧取得 ---
     fetchBoards();
