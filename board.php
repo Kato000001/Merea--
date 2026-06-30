@@ -1,3 +1,14 @@
+<?php
+session_start();
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -321,6 +332,14 @@
             state.isViewerDragging = false;
         });
 
+    </script>
+        <!-- bfcache対策を追加 -->
+    <script>
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
     </script>
 </body>
 </html>

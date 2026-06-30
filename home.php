@@ -1,6 +1,9 @@
 <?php
 session_start();
-
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 // ログインしていない場合はログイン画面に戻す
 if (!isset($_SESSION['user_id'])) {
@@ -45,6 +48,11 @@ if (!isset($_SESSION['user_id'])) {
             <div class="w-9 h-9 rounded-full bg-[#EBB73E] flex items-center justify-center text-gray-900 font-bold shadow-inner">
                 M
             </div>
+            <!-- ログアウトボタン（Mアイコンの外に出す） -->
+            <a href="php/logout.php" class="ml-2 text-gray-400 hover:text-white transition" title="ログアウト">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </a>
+            
         </div>
     </header>
 
@@ -111,8 +119,16 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
     </div>
-
+<script>
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        // bfcacheから復元された場合、強制的にリロードする
+        window.location.reload();
+    }
+});
+</script>
     <!-- Custom JS -->
     <script src="js/app.js"></script>
+    
 </body>
 </html>

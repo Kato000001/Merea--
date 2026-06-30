@@ -6,5 +6,5 @@ $_SESSION = [];
 session_destroy();
 
 // ログイン画面へリダイレクト
-header('Location: ../login.html');
+header('Location: ../login.php');
 exit;
