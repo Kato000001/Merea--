@@ -37,3 +37,85 @@ body {
     width: 80%;
     outline: none;
 }
+
+/* ==========================================
+Merea ログイン画面専用スタイル
+   ========================================== */
+
+.login-body {
+    background-color: #4D4D4D; /* 画像のダークグレー */
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif;
+    user-select: none;
+}
+
+.login-wrapper {
+    text-align: center;
+    width: 100%;
+    max-width: 500px; /* 全体のバランスをとる横幅 */
+}
+
+.login-logo {
+    color: #EBB73E; /* Mereaゴールド */
+    font-size: 5rem; /* ドンと大きく */
+    font-weight: bold;
+    margin: 0 0 40px 0;
+    letter-spacing: 0.05em;
+}
+
+.login-form {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* 入力欄とボタンの隙間 */
+    padding: 0 20px;
+}
+
+#passwordInput {
+    flex: 1;
+    max-width: 300px;
+    height: 48px;
+    background-color: #F0F0F2; /* うっすらグレーの利いた白 */
+    border: none;
+    border-radius: 6px; /* 緩やかな丸み */
+    padding: 0 15px;
+    font-size: 1rem;
+    color: #333;
+    outline: none;
+    box-sizing: border-box;
+}
+
+#passwordInput::placeholder {
+    color: #757575;
+}
+
+#loginButton {
+    width: 90px;
+    height: 48px;
+    background-color: #EBB73E; /* ロゴとお揃いの黄色 */
+    color: #1A1A1A;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#loginButton:hover {
+    background-color: #D6A430; /* ホバー時に少し暗くして押しやすく */
+}
+
+/* 間違えた時のエラー文字用 */
+.error-message {
+    height: 20px;
+    margin-top: 15px;
+    color: #FF8080;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+}

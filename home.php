@@ -1,4 +1,15 @@
+<?php
+session_start();
+
+
+// ログインしていない場合はログイン画面に戻す
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
+...<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -24,7 +35,7 @@
             <!-- Search Bar -->
             <div class="flex-1 max-w-xl relative">
                 <input type="text" id="search-input" placeholder="ボードを検索" autocomplete="off"
-                       class="w-full bg-[#F3F4F6] text-gray-800 rounded-sm py-1.5 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[#EBB73E] text-sm transition-all duration-200">
+                    class="w-full bg-[#F3F4F6] text-gray-800 rounded-sm py-1.5 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[#EBB73E] text-sm transition-all duration-200">
                     <span class="absolute right-3 top-2.5 text-gray-400">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </span>

@@ -243,3 +243,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 初期実行 ---
     renderBoards();
 });
+
+
+// ==========================================
+// ログイン画面用の処理（app.jsの末尾に追記）
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+});
