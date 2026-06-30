@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // ボードカード自体をクリックした時の画面遷移処理
             card.addEventListener('click', () => {
-                window.location.href = `board.html?id=${board.id}`;
+            window.location.href = `board.php?id=${board.id}`;
             });
 
             DOM.grid.appendChild(card);

@@ -44,10 +44,7 @@ if (!isset($_SESSION['user_id'])) {
                 </span>
             </div>
             
-            <!-- User Icon Placeholder -->
-            <div class="w-9 h-9 rounded-full bg-[#EBB73E] flex items-center justify-center text-gray-900 font-bold shadow-inner">
-                M
-            </div>
+
             <!-- ログアウトボタン（Mアイコンの外に出す） -->
             <a href="php/logout.php" class="ml-2 text-gray-400 hover:text-white transition" title="ログアウト">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>

@@ -80,7 +80,7 @@ if (!isset($_SESSION['user_id'])) {
             Merea
         </button>
         <div id="dropdown-menu" class="mt-2 bg-gray-800 text-white rounded shadow-lg w-48 overflow-hidden">
-            <a href="home.html" class="block px-4 py-3 hover:bg-gray-700">🏠 ホームに戻る</a>
+            <a href="home.php" class="block px-4 py-3 hover:bg-gray-700">🏠 ホームに戻る</a>
             <button id="import-img-btn" class="w-full text-left px-4 py-3 hover:bg-gray-700">🖼️ 画像をインポート</button>
             <button id="add-link-btn" class="w-full text-left px-4 py-3 hover:bg-gray-700">🔗 リンクを追加</button>
             <button id="add-text-btn" class="w-full text-left px-4 py-3 hover:bg-gray-700">📝 テキストメモを追加</button>
