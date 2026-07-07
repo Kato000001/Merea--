@@ -17,7 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
         menuDelete: document.getElementById('menu-delete'),
         deleteModal: document.getElementById('delete-modal'),
         deleteCancelBtn: document.getElementById('delete-cancel-btn'),
-        deleteConfirmBtn: document.getElementById('delete-confirm-btn')
+        deleteConfirmBtn: document.getElementById('delete-confirm-btn'),
+        renameModal: document.getElementById('rename-modal'),
+        renameBoardTitle: document.getElementById('rename-board-title'),
+        renameCancelBtn: document.getElementById('rename-cancel-btn'),
+        renameConfirmBtn: document.getElementById('rename-confirm-btn')
     };
 
     // --- ① DBからボード一覧を取得する ---
@@ -214,7 +218,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+// --- リネームモーダルを開く ---
+DOM.menuRename.addEventListener('click', () => {
+    DOM.kebabDropdown.classList.add('hidden');
+    if (!activeBoardId) return;
+    const board = boards.find(b => b.id === activeBoardId);
+    DOM.renameBoardTitle.value = board ? board.title : '';
+    DOM.renameModal.classList.remove('hidden');
+    DOM.renameBoardTitle.focus();
+});
 
+const closeRenameModal = () => DOM.renameModal.classList.add('hidden');
+DOM.renameCancelBtn.addEventListener('click', closeRenameModal);
+DOM.renameModal.addEventListener('click', (e) => {
+    if (e.target === DOM.renameModal) closeRenameModal();
+});
+
+// --- リネームを確定（DBに更新リクエストを送る） ---
+DOM.renameConfirmBtn.addEventListener('click', async () => {
+    const newTitle = DOM.renameBoardTitle.value.trim();
+    if (!newTitle || !activeBoardId) return;
+
+    try {
+        const res = await fetch('php/boards_rename.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: activeBoardId, name: newTitle })
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        const board = boards.find(b => b.id === activeBoardId);
+        if (board) board.title = newTitle;
+        renderBoards(DOM.searchInput.value);
+    } catch (err) {
+        console.error('ボードリネームエラー:', err);
+    } finally {
+        closeRenameModal();
+    }
+});
     // --- 初期実行：DBから一覧取得 ---
     fetchBoards();
 });
