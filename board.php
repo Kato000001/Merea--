@@ -118,6 +118,20 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 
+
+    <!-- URL入力モーダル -->
+    <div id="url-modal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center">
+        <div class="bg-gray-900 p-6 rounded-xl shadow-2xl w-96">
+            <h3 class="text-lg font-bold mb-4 text-yellow-500">🔗 リンクを追加</h3>
+            <input type="text" id="url-input" placeholder="https://..." 
+                class="w-full bg-gray-800 text-white border border-gray-600 p-3 mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500">
+            <div class="flex justify-end gap-3">
+                <button id="url-cancel-btn" class="px-4 py-2 bg-gray-700 text-gray-200 rounded-lg hover:bg-gray-600 transition">キャンセル</button>
+                <button id="url-confirm-btn" class="px-4 py-2 bg-yellow-500 text-gray-950 rounded-lg hover:bg-yellow-400 transition font-bold">追加</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- 状態管理 ---
         const state = {
@@ -209,42 +223,42 @@ if (!isset($_SESSION['user_id'])) {
 
          // --- カード生成ロジック ---
             function createCard(type, content, cardId = null, x = null, y = null) {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.dataset.cardId = cardId;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.cardId = cardId;
 
-            const posX = x !== null ? x : (window.innerWidth / 2) - state.canvasX - 100;
-            const posY = y !== null ? y : (window.innerHeight / 2) - state.canvasY - 100;
-            card.style.left = `${posX}px`;
-            card.style.top = `${posY}px`;
+        const posX = x !== null ? x : (window.innerWidth / 2) - state.canvasX - 100;
+        const posY = y !== null ? y : (window.innerHeight / 2) - state.canvasY - 100;
+        card.style.left = `${posX}px`;
+        card.style.top = `${posY}px`;
 
-            if (type === 'image') {
-                const img = document.createElement('img');
-                img.src = content;
-                card.appendChild(img);
-                card.addEventListener('dblclick', (e) => {
-                    if (state.draggingCard) return;
-                    openViewer(content);
+        if (type === 'image') {
+            const img = document.createElement('img');
+            img.src = content;
+            card.appendChild(img);
+            card.addEventListener('dblclick', (e) => {
+                if (state.draggingCard) return;
+                openViewer(content);
+            });
+        } else if (type === 'text') {
+            card.classList.add('card-text');
+            card.contentEditable = true;
+            if (content) card.innerText = content;
+            card.addEventListener('pointerdown', (e) => e.stopPropagation());
+            card.addEventListener('blur', async () => {
+                const cardId = card.dataset.cardId;
+                if (!cardId) return;
+                await fetch('php/cards_update_text.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ card_id: cardId, content: card.innerText })
                 });
-            } else if (type === 'text') {
-                card.classList.add('card-text');
-                card.contentEditable = true;
-                if (content) card.innerText = content;
-                card.addEventListener('pointerdown', (e) => e.stopPropagation());
-                card.addEventListener('blur', async () => {
-                    const cardId = card.dataset.cardId;
-                    if (!cardId) return;
-                    await fetch('php/cards_update_text.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ card_id: cardId, content: card.innerText })
-                    });
-                });
-            }
-
-            card.addEventListener('pointerdown', startCardDrag);
-            DOM.canvas.appendChild(card);
+            });
         }
+
+        card.addEventListener('pointerdown', startCardDrag);
+        DOM.canvas.appendChild(card);
+    }
 
 
 
