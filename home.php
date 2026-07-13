@@ -12,7 +12,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 ?>
 <!DOCTYPE html>
-...<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">

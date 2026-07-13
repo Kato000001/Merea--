@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             infoArea.appendChild(titleSpan);
 
             const kebabBtn = document.createElement('button');
-            kebabBtn.className = 'text-gray-400 hover:text-white p-1 menu-btn';
+            kebabBtn.className = 'text-gray-400 hover:text-white p-3 menu-btn';
             kebabBtn.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>';
 
             kebabBtn.addEventListener('click', (e) => {
