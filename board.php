@@ -61,7 +61,18 @@ if (!isset($_SESSION['user_id'])) {
         .card img { max-width: 200px; max-height: 200px; object-fit: contain; pointer-events: none; }
         
         /* テキストメモ用のスタイル */
-        .card-text { min-width: 150px; min-height: 100px; background: #fff9c4; outline: none; }
+        .card-text { 
+        width: 200px;
+        min-height: 100px;
+        max-height: 200px;
+        overflow-y: auto;
+        background: #fffad2; 
+        outline: none;
+        word-break: break-all;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        user-select: text;
+        }
 
         /* メニューのドロップダウン */
         #dropdown-menu { display: none; }
@@ -96,7 +107,7 @@ if (!isset($_SESSION['user_id'])) {
     <div id="viewer-modal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center">
         <button id="viewer-close" class="absolute top-4 left-4 text-white text-4xl p-2 hover:text-gray-400 z-[110]">&lt;</button>
         
-        <div class="relative w-full h-full flex items-center justify-center overflow-hidden cursor-move" id="viewer-drag-area">
+    <div class="relative w-full h-full flex items-center justify-center overflow-hidden cursor-grab" id="viewer-drag-area">
             <img id="viewer-img" src="" class="max-w-full max-h-full object-contain transition-transform duration-200" style="transform: scale(1) translate(0px, 0px);">
         </div>
 
@@ -119,9 +130,10 @@ if (!isset($_SESSION['user_id'])) {
             viewerScale: 1,
             viewerX: 0,
             viewerY: 0,
-            isViewerDragging: false
+            isViewerDragging: false,
+            viewerStartX: 0,
+            viewerStartY: 0
         };
-
         const DOM = {
             container: document.getElementById('canvas-container'),
             canvas: document.getElementById('canvas'),
@@ -156,15 +168,29 @@ if (!isset($_SESSION['user_id'])) {
             DOM.dropdown.classList.remove('show');
         });
 
-        DOM.fileInput.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            createCard('image', event.target.result);
-        }
-        reader.readAsDataURL(file);
-    });
+        DOM.fileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            const boardId = new URLSearchParams(location.search).get('id');
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('board_id', boardId);
+
+                const res = await fetch('php/cards_upload.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    continue;
+                }
+
+                createCard('image', data.file_path, data.card_id);
+            }
+            e.target.value = '';
 });
 
         // --- テキストメモ追加 ---
@@ -173,110 +199,110 @@ if (!isset($_SESSION['user_id'])) {
             DOM.dropdown.classList.remove('show');
         });
 
-                // --- カード生成ロジック ---
-        function createCard(type, content) {
+         // --- カード生成ロジック ---
+            function createCard(type, content, cardId = null, x = null, y = null) {
             const card = document.createElement('div');
             card.className = 'card';
-            
-            // 画面の中央に出現させるための計算（キャンバスの移動分を相殺）
-            const centerX = (window.innerWidth / 2) - state.canvasX - 100;
-            const centerY = (window.innerHeight / 2) - state.canvasY - 100;
-            card.style.left = `${centerX}px`;
-            card.style.top = `${centerY}px`;
+            card.dataset.cardId = cardId;
 
+            // 座標が指定されていればそれを使い、なければ画面中央に配置
+            const posX = x !== null ? x : (window.innerWidth / 2) - state.canvasX - 100;
+            const posY = y !== null ? y : (window.innerHeight / 2) - state.canvasY - 100;
+            card.style.left = `${posX}px`;
+            card.style.top = `${posY}px`;
             if (type === 'image') {
                 const img = document.createElement('img');
                 img.src = content;
                 card.appendChild(img);
-                
-                // ★修正点： クリック(click)ではなく、ダブルクリック(dblclick)でビューアを開く
+
                 card.addEventListener('dblclick', (e) => {
-                    // ドラッグ中は開かない安全装置（念のため）
-                    if (state.draggingCard) return; 
+                    if (state.draggingCard) return;
                     openViewer(content);
                 });
             } else if (type === 'text') {
                 card.classList.add('card-text');
                 card.contentEditable = true;
-                card.innerText = 'テキストを入力...';
-                // テキスト選択の際にドラッグさせないための制御
                 card.addEventListener('pointerdown', (e) => e.stopPropagation());
             }
 
-            // ドラッグ用のイベント設定（こちらは1タップ目で発火してOK）
-            card.addEventListener('pointerdown', startCardDrag);
-            DOM.canvas.appendChild(card);
-        }
+card.addEventListener('pointerdown', startCardDrag);
+DOM.canvas.appendChild(card);
+}
 
-        // --- 無限キャンバス＆カードのドラッグ制御 ---
-        DOM.container.addEventListener('pointerdown', (e) => {
-            if (e.target === DOM.container || e.target === DOM.canvas) {
-                // キャンバスの移動（パン）開始
-                state.isPanning = true;
-                state.startX = e.clientX - state.canvasX;
-                state.startY = e.clientY - state.canvasY;
-                DOM.container.style.cursor = 'grabbing';
-            }
-        });
 
         function startCardDrag(e) {
-            if (e.button !== 0) return; // 左クリックのみ
+            if (e.button !== 0) return;
+            
+            const now = Date.now();
+            if (now - (e.currentTarget._lastClick || 0) < 300) {
+                e.currentTarget._lastClick = 0;
+                return;
+            }
+            e.currentTarget._lastClick = now;
+
             state.draggingCard = e.currentTarget;
+            
+            // クリックしたカードを最前面に
+            document.querySelectorAll('.card').forEach(c => c.style.zIndex = '1');
+            state.draggingCard.style.zIndex = '10';
+            
             const rect = state.draggingCard.getBoundingClientRect();
-            // カード内でのクリック位置のズレを保持
             state.startX = e.clientX - rect.left;
             state.startY = e.clientY - rect.top;
             
-            DOM.trashZone.style.opacity = '1'; // ゴミ箱出現
-            e.stopPropagation(); // キャンバスのドラッグを発火させない
-        }
+            DOM.trashZone.style.opacity = '1';
+            e.stopPropagation();
+}
 
         window.addEventListener('pointermove', (e) => {
-            if (state.isPanning) {
-                // キャンバス移動
-                state.canvasX = e.clientX - state.startX;
-                state.canvasY = e.clientY - state.startY;
-                DOM.canvas.style.transform = `translate(${state.canvasX}px, ${state.canvasY}px)`;
-            } else if (state.draggingCard) {
-                // カード移動 (キャンバスの移動分を考慮して座標を計算)
-                const newX = e.clientX - state.startX - state.canvasX;
-                const newY = e.clientY - state.startY - state.canvasY;
-                state.draggingCard.style.left = `${newX}px`;
-                state.draggingCard.style.top = `${newY}px`;
+    if (state.isPanning) {
+        state.canvasX = e.clientX - state.startX;
+        state.canvasY = e.clientY - state.startY;
+        DOM.canvas.style.transform = `translate(${state.canvasX}px, ${state.canvasY}px)`;
+    } else if (state.draggingCard) {
+        let newX = e.clientX - state.startX - state.canvasX;
+        let newY = e.clientY - state.startY - state.canvasY;
 
-                // ゴミ箱の当たり判定（ホバー状態のフィードバック）
-                const trashRect = DOM.trashZone.getBoundingClientRect();
-                if (e.clientX > trashRect.left && e.clientX < trashRect.right &&
-                    e.clientY > trashRect.top && e.clientY < trashRect.bottom) {
-                    DOM.trashZone.classList.add('bg-red-700', 'scale-110');
-                } else {
-                    DOM.trashZone.classList.remove('bg-red-700', 'scale-110');
-                }
-            }
-        });
+        // キャンバスの境界制限
+        const cardW = state.draggingCard.offsetWidth;
+        const cardH = state.draggingCard.offsetHeight;
+        newX = Math.max(0, Math.min(newX, 3840 - cardW));
+        newY = Math.max(0, Math.min(newY, 2160 - cardH));
 
-        window.addEventListener('pointerup', (e) => {
-            if (state.isPanning) {
-                state.isPanning = false;
-                DOM.container.style.cursor = 'grab';
-            }
+        state.draggingCard.style.left = `${newX}px`;
+        state.draggingCard.style.top = `${newY}px`;
 
-            if (state.draggingCard) {
-                // ゴミ箱の当たり判定でドロップ処理
-                const trashRect = DOM.trashZone.getBoundingClientRect();
-                if (e.clientX > trashRect.left && e.clientX < trashRect.right &&
-                    e.clientY > trashRect.top && e.clientY < trashRect.bottom) {
-                    state.draggingCard.remove(); // カード削除
-                }
-                
-                state.draggingCard = null;
-                DOM.trashZone.style.opacity = '0'; // ゴミ箱隠す
-                DOM.trashZone.classList.remove('bg-red-700', 'scale-110');
-                
-                // クリック判定との競合を避けるための微小なディレイ
-                setTimeout(() => { state.draggingCard = null; }, 50);
-            }
-        });
+
+        const trashRect = DOM.trashZone.getBoundingClientRect();
+        if (e.clientX > trashRect.left && e.clientX < trashRect.right &&
+            e.clientY > trashRect.top && e.clientY < trashRect.bottom) {
+            DOM.trashZone.classList.add('bg-red-700', 'scale-110');
+        } else {
+            DOM.trashZone.classList.remove('bg-red-700', 'scale-110');
+        }                                        // ← ここで内側のif終わり
+    } else if (state.isViewerDragging) {         // ← ここが外側のelse if
+        state.viewerX = e.clientX - state.viewerStartX;
+        state.viewerY = e.clientY - state.viewerStartY;
+        updateViewerTransform();
+    }
+});
+
+// --- ページ読み込み時にカードを復元 ---
+async function loadCards() {
+    const boardId = new URLSearchParams(location.search).get('id');
+    if (!boardId) return;
+
+    const res = await fetch(`php/cards_load.php?board_id=${boardId}`);
+    const cards = await res.json();
+
+    cards.forEach(card => {
+        if (card.type === 'image') {
+            createCard('image', card.file_path, card.id, card.pos_x, card.pos_y);
+        }
+    });
+}
+
+loadCards();
 
         // --- ⑤ 詳細ビューア制御 ---
         function openViewer(src) {
@@ -291,7 +317,7 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         function updateViewerTransform() {
-            DOM.viewerImg.style.transform = `translate(${state.viewerX}px, ${state.viewerY}px) scale(${state.viewerScale})`;
+        DOM.viewerImg.style.transform = `translate(${state.viewerX}px, ${state.viewerY}px) scale(${state.viewerScale})`;
         }
 
         function resetViewer() {
@@ -300,7 +326,6 @@ if (!isset($_SESSION['user_id'])) {
             state.viewerY = 0;
             updateViewerTransform();
         }
-
         DOM.viewerClose.addEventListener('click', closeViewer);
         DOM.viewerModal.addEventListener('click', (e) => {
             if (e.target === DOM.viewerDragArea) closeViewer(); // 背景クリックで閉じる
@@ -310,26 +335,52 @@ if (!isset($_SESSION['user_id'])) {
         DOM.zoomOut.addEventListener('click', () => { state.viewerScale /= 1.2; updateViewerTransform(); });
         DOM.zoomReset.addEventListener('click', resetViewer);
 
-        // ビューア内の画像ドラッグ（拡大時の移動）
+         // ビューア内ドラッグ
         DOM.viewerDragArea.addEventListener('pointerdown', (e) => {
-            if (e.target !== DOM.viewerImg) return;
             state.isViewerDragging = true;
-            state.startX = e.clientX - state.viewerX;
-            state.startY = e.clientY - state.viewerY;
+            state.viewerStartX = e.clientX - state.viewerX;
+            state.viewerStartY = e.clientY - state.viewerY;
             e.preventDefault();
         });
 
-        window.addEventListener('pointermove', (e) => {
-            if (state.isViewerDragging) {
-                state.viewerX = e.clientX - state.startX;
-                state.viewerY = e.clientY - state.startY;
-                updateViewerTransform();
+        window.addEventListener('pointerup', async (e) => {
+            state.isViewerDragging = false;  // ← 追加
+            if (state.isPanning) {
+                state.isPanning = false;
+                DOM.container.style.cursor = 'grab';
             }
-        });
 
-        window.addEventListener('pointerup', () => {
-            state.isViewerDragging = false;
-        });
+    if (state.draggingCard) {
+        const trashRect = DOM.trashZone.getBoundingClientRect();
+        if (e.clientX > trashRect.left && e.clientX < trashRect.right &&
+            e.clientY > trashRect.top && e.clientY < trashRect.bottom) {
+            const cardId = state.draggingCard.dataset.cardId;
+            if (cardId) {
+                await fetch('php/cards_delete.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ card_id: cardId })
+                });
+            }
+            state.draggingCard.remove();
+        } else {
+            const cardId = state.draggingCard.dataset.cardId;
+            const x = parseFloat(state.draggingCard.style.left);
+            const y = parseFloat(state.draggingCard.style.top);
+            if (cardId) {
+                await fetch('php/cards_save.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ card_id: cardId, x, y })
+                });
+            }
+        }
+
+        state.draggingCard = null;
+        DOM.trashZone.style.opacity = '0';
+        DOM.trashZone.classList.remove('bg-red-700', 'scale-110');
+    }
+});
 
     </script>
         <!-- bfcache対策を追加 -->

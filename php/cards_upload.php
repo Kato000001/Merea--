@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db.php';
+require_once __DIR__ . '/db.php';
 
 header('Content-Type: application/json');
 
@@ -33,7 +33,7 @@ if (!$file) {
 // uploadsフォルダに保存
 $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
 $filename = uniqid() . '.' . $ext;
-$savePath = __DIR__ . '/uploads/' . $filename;
+$savePath = __DIR__ . '/../uploads/' . $filename;
 
 if (!move_uploaded_file($file['tmp_name'], $savePath)) {
     http_response_code(500);
