@@ -261,6 +261,33 @@ DOM.renameConfirmBtn.addEventListener('click', async () => {
         closeRenameModal();
     }
 });
+
+
+// --- ボードを複製（DBに更新リクエストを送る） ---
+DOM.menuDuplicate.addEventListener('click', async () => {
+    if (!activeBoardId) return;
+
+    try {
+        const res = await fetch('php/boards_duplicate.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: activeBoardId })
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        boards.push({ id: data.id, title: data.name });
+        renderBoards(DOM.searchInput.value);
+        DOM.kebabDropdown.classList.add('hidden');
+    } catch (err) {
+        console.error('ボード複製エラー:', err);
+    } 
+});
+
+
     // --- 初期実行：DBから一覧取得 ---
     fetchBoards();
 });

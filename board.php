@@ -87,7 +87,7 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 
-    <input type="file" id="file-input" accept="image/png, image/jpeg, image/gif" class="hidden">
+    <input type="file" id="file-input" accept="image/png, image/jpeg, image/gif" class="hidden" multiple>
 
     <div id="trash-zone" class="absolute top-4 right-4 w-16 h-16 bg-red-500 text-white flex items-center justify-center rounded-full opacity-0 pointer-events-none transition-opacity duration-300 z-40 flex-col shadow-lg">
         <span class="text-2xl">🗑️</span>
@@ -157,16 +157,15 @@ if (!isset($_SESSION['user_id'])) {
         });
 
         DOM.fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    createCard('image', event.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-            e.target.value = ''; // リセット
-        });
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            createCard('image', event.target.result);
+        }
+        reader.readAsDataURL(file);
+    });
+});
 
         // --- テキストメモ追加 ---
         DOM.addTextBtn.addEventListener('click', () => {
