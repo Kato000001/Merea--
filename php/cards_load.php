@@ -19,9 +19,11 @@ if (!$boardId) {
 
 // cardsとcard_imagesをJOINして取得
 $stmt = $pdo->prepare('
-    SELECT c.id, c.type, c.pos_x, c.pos_y, c.content, ci.file_path
+    SELECT c.id, c.type, c.pos_x, c.pos_y, c.content, ci.file_path,
+           cu.url, cu.title, cu.thumbnail_url
     FROM cards c
     LEFT JOIN card_images ci ON c.id = ci.card_id
+    LEFT JOIN card_urls cu ON c.id = cu.card_id
     WHERE c.board_id = ?
     ORDER BY c.created_at ASC
 ');

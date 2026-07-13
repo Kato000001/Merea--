@@ -163,7 +163,12 @@ if (!isset($_SESSION['user_id'])) {
             zoomIn: document.getElementById('zoom-in'),
             zoomOut: document.getElementById('zoom-out'),
             zoomReset: document.getElementById('zoom-reset'),
-            viewerDragArea: document.getElementById('viewer-drag-area')
+            viewerDragArea: document.getElementById('viewer-drag-area'),
+            urlModal: document.getElementById('url-modal'),
+            urlInput: document.getElementById('url-input'),
+            urlCancelBtn: document.getElementById('url-cancel-btn'),
+            urlConfirmBtn: document.getElementById('url-confirm-btn'),
+            addLinkBtn: document.getElementById('add-link-btn')
         };
 
         // --- ① メニュー制御 ---
@@ -221,6 +226,43 @@ if (!isset($_SESSION['user_id'])) {
             DOM.dropdown.classList.remove('show');
 });
 
+// --- リンク追加モーダルの制御 ---
+DOM.addLinkBtn.addEventListener('click', () => {
+    DOM.urlInput.value = '';
+    DOM.urlModal.classList.remove('hidden');
+    DOM.urlInput.focus();
+    DOM.dropdown.classList.remove('show');
+});
+
+const closeUrlModal = () => DOM.urlModal.classList.add('hidden');
+DOM.urlCancelBtn.addEventListener('click', closeUrlModal);
+DOM.urlModal.addEventListener('click', (e) => {
+    if (e.target === DOM.urlModal) closeUrlModal();
+});
+
+
+// --- URLを確定してカードを作成 ---
+DOM.urlConfirmBtn.addEventListener('click', async () => {
+    const url = DOM.urlInput.value.trim();
+    if (!url) return;
+
+    const boardId = new URLSearchParams(location.search).get('id');
+    const res = await fetch('php/cards_add_url.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ board_id: boardId, url })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
+
+    createCard('url', { url: data.url, title: data.title, thumbnail: data.thumbnail }, data.card_id);
+    closeUrlModal();
+});
+
          // --- カード生成ロジック ---
             function createCard(type, content, cardId = null, x = null, y = null) {
         const card = document.createElement('div');
@@ -254,8 +296,35 @@ if (!isset($_SESSION['user_id'])) {
                     body: JSON.stringify({ card_id: cardId, content: card.innerText })
                 });
             });
-        }
+        }else if (type === 'url') {
+            card.style.width = '200px';
+            card.style.padding = '0';
+            card.style.overflow = 'hidden';
 
+            if (content.thumbnail) {
+                const img = document.createElement('img');
+                img.src = content.thumbnail;
+                img.style.width = '100%';
+                img.style.height = '120px';
+                img.style.objectFit = 'cover';
+                img.style.pointerEvents = 'none';
+                card.appendChild(img);
+            }
+
+            const info = document.createElement('div');
+            info.style.padding = '8px';
+            info.style.fontSize = '12px';
+            info.style.color = '#333';
+            info.style.overflow = 'hidden';
+            info.style.whiteSpace = 'nowrap';
+            info.style.textOverflow = 'ellipsis';
+            info.innerText = content.title || content.url;
+            card.appendChild(info);
+
+            card.addEventListener('dblclick', () => {
+                window.open(content.url, '_blank');
+            });
+        }
         card.addEventListener('pointerdown', startCardDrag);
         DOM.canvas.appendChild(card);
     }
@@ -333,6 +402,8 @@ async function loadCards() {
         createCard('image', card.file_path, card.id, card.pos_x, card.pos_y);
     } else if (card.type === 'text') {
         createCard('text', card.content, card.id, card.pos_x, card.pos_y);
+    } else if (card.type === 'url') {
+        createCard('url', { url: card.url, title: card.title, thumbnail: card.thumbnail_url }, card.id, card.pos_x, card.pos_y);
     }
 });
 }

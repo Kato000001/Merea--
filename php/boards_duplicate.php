@@ -69,6 +69,16 @@ foreach ($cards as $card) {
             $stmt = $pdo->prepare('INSERT INTO card_images (card_id, file_path) VALUES (?, ?)');
             $stmt->execute([$newCardId, 'uploads/' . $newFilename]);
         }
+        } else if ($card['type'] === 'url') {
+        $stmt = $pdo->prepare('SELECT url, title, thumbnail_url FROM card_urls WHERE card_id = ?');
+        $stmt->execute([$card['id']]);
+        $urlData = $stmt->fetch();
+
+        if ($urlData) {
+            $stmt = $pdo->prepare('INSERT INTO card_urls (card_id, url, title, thumbnail_url) VALUES (?, ?, ?, ?)');
+            $stmt->execute([$newCardId, $urlData['url'], $urlData['title'], $urlData['thumbnail_url']]);
+        }
+
     }
 }
 
