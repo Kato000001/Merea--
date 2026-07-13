@@ -194,10 +194,18 @@ if (!isset($_SESSION['user_id'])) {
 });
 
         // --- テキストメモ追加 ---
-        DOM.addTextBtn.addEventListener('click', () => {
-            createCard('text', '');
+        DOM.addTextBtn.addEventListener('click', async () => {
+            const boardId = new URLSearchParams(location.search).get('id');
+            const res = await fetch('php/cards_create_text.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ board_id: boardId })
+            });
+            const data = await res.json();
+            if (data.error) { alert(data.error); return; }
+            createCard('text', '', data.card_id);
             DOM.dropdown.classList.remove('show');
-        });
+});
 
          // --- カード生成ロジック ---
             function createCard(type, content, cardId = null, x = null, y = null) {
@@ -205,16 +213,15 @@ if (!isset($_SESSION['user_id'])) {
             card.className = 'card';
             card.dataset.cardId = cardId;
 
-            // 座標が指定されていればそれを使い、なければ画面中央に配置
             const posX = x !== null ? x : (window.innerWidth / 2) - state.canvasX - 100;
             const posY = y !== null ? y : (window.innerHeight / 2) - state.canvasY - 100;
             card.style.left = `${posX}px`;
             card.style.top = `${posY}px`;
+
             if (type === 'image') {
                 const img = document.createElement('img');
                 img.src = content;
                 card.appendChild(img);
-
                 card.addEventListener('dblclick', (e) => {
                     if (state.draggingCard) return;
                     openViewer(content);
@@ -222,12 +229,24 @@ if (!isset($_SESSION['user_id'])) {
             } else if (type === 'text') {
                 card.classList.add('card-text');
                 card.contentEditable = true;
+                if (content) card.innerText = content;
                 card.addEventListener('pointerdown', (e) => e.stopPropagation());
+                card.addEventListener('blur', async () => {
+                    const cardId = card.dataset.cardId;
+                    if (!cardId) return;
+                    await fetch('php/cards_update_text.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ card_id: cardId, content: card.innerText })
+                    });
+                });
             }
 
-card.addEventListener('pointerdown', startCardDrag);
-DOM.canvas.appendChild(card);
-}
+            card.addEventListener('pointerdown', startCardDrag);
+            DOM.canvas.appendChild(card);
+        }
+
+
 
 
         function startCardDrag(e) {
@@ -296,10 +315,12 @@ async function loadCards() {
     const cards = await res.json();
 
     cards.forEach(card => {
-        if (card.type === 'image') {
-            createCard('image', card.file_path, card.id, card.pos_x, card.pos_y);
-        }
-    });
+    if (card.type === 'image') {
+        createCard('image', card.file_path, card.id, card.pos_x, card.pos_y);
+    } else if (card.type === 'text') {
+        createCard('text', card.content, card.id, card.pos_x, card.pos_y);
+    }
+});
 }
 
 loadCards();
