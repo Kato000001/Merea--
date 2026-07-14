@@ -58,7 +58,7 @@ if (!isset($_SESSION['user_id'])) {
             z-index: 50;
             box-shadow: 0 10px 15px rgba(0,0,0,0.4);
         }
-        .card img { max-width: 200px; max-height: 200px; object-fit: contain; pointer-events: none; }
+        .card img { max-width: 350px; max-height: 350px; object-fit: contain; pointer-events: none; }
         
         /* テキストメモ用のスタイル */
         .card-text { 
@@ -100,8 +100,8 @@ if (!isset($_SESSION['user_id'])) {
 
     <input type="file" id="file-input" accept="image/png, image/jpeg, image/gif" class="hidden" multiple>
 
-    <div id="trash-zone" class="absolute top-4 right-4 w-24 h-24 bg-red-500 text-white flex items-center justify-center rounded-full opacity-0 pointer-events-none transition-opacity duration-300 z-40 flex-col shadow-lg">
-        <span class="text-3xl">🗑️</span>
+    <div id="trash-zone" class="absolute top-4 right-4 w-24 h-24 flex items-center justify-center rounded-full opacity-0 pointer-events-none transition-opacity duration-300 z-40 shadow-lg">
+        <img src="trash_can.png" class="w-16 h-16 object-contain pointer-events-none">
     </div>
 
     <div id="viewer-modal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center">
@@ -297,7 +297,7 @@ DOM.urlConfirmBtn.addEventListener('click', async () => {
                 });
             });
         }else if (type === 'url') {
-            card.style.width = '200px';
+            card.style.width = '300px';
             card.style.padding = '0';
             card.style.overflow = 'hidden';
 
@@ -305,7 +305,7 @@ DOM.urlConfirmBtn.addEventListener('click', async () => {
                 const img = document.createElement('img');
                 img.src = content.thumbnail;
                 img.style.width = '100%';
-                img.style.height = '120px';
+                img.style.height = '169px';
                 img.style.objectFit = 'cover';
                 img.style.pointerEvents = 'none';
                 card.appendChild(img);

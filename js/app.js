@@ -109,7 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM.newBoardTitle.focus();
     });
 
-    const closeCreateModal = () => DOM.createModal.classList.add('hidden');
+    const closeCreateModal = () => {
+    DOM.createModal.classList.add('hidden');
+    document.getElementById('create-error').classList.add('hidden');
+    };
     DOM.modalCancelBtn.addEventListener('click', closeCreateModal);
     DOM.createModal.addEventListener('click', (e) => {
         if (e.target === DOM.createModal) closeCreateModal();
@@ -129,9 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
 
             if (data.error) {
-                alert(data.error);
-                return;
-            }
+            const errEl = document.getElementById('create-error');
+            errEl.textContent = data.error;
+            errEl.classList.remove('hidden');
+            return;
+        }
 
             // 作成成功したらリストに追加
             boards.push({ id: data.id, title: data.name });

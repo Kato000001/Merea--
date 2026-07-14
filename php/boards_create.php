@@ -31,6 +31,15 @@ if ($name === '') {
     exit;
 }
 
+// 同名チェック
+$stmt = $pdo->prepare('SELECT id FROM boards WHERE user_id = ? AND name = ?');
+$stmt->execute([$userId, $name]);
+if ($stmt->fetch()) {
+    http_response_code(400);
+    echo json_encode(['error' => '同じ名前のボードが既に存在します']);
+    exit;
+}
+
 // boardsテーブルに新規登録
 $stmt = $pdo->prepare('INSERT INTO boards (user_id, name) VALUES (?, ?)');
 $stmt->execute([$userId, $name]);

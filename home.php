@@ -38,9 +38,6 @@ if (!isset($_SESSION['user_id'])) {
             <div class="flex-1 max-w-xl relative">
                 <input type="text" id="search-input" placeholder="ボードを検索" autocomplete="off"
                     class="w-full bg-[#F3F4F6] text-gray-800 rounded-sm py-1.5 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[#EBB73E] text-sm transition-all duration-200">
-                    <span class="absolute right-3 top-2.5 text-gray-400">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </span>
             </div>
             
 
@@ -95,6 +92,7 @@ if (!isset($_SESSION['user_id'])) {
                 <i class="fa-solid fa-folder-plus"></i> 新規ボード作成
             </h3>
             <input type="text" id="new-board-title" placeholder="ボードの名前を入力..." class="w-full bg-[#F3F4F6] text-gray-800 border-0 p-3 mb-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#EBB73E] font-medium">
+            <p id="create-error" class="text-red-400 text-sm mb-2 hidden"></p>
             <div class="flex justify-end gap-3">
                 <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-600 text-gray-200 rounded-xl hover:bg-gray-500 transition font-medium">キャンセル</button>
                 <button id="modal-create-btn" class="px-4 py-2 bg-[#EBB73E] text-gray-950 rounded-xl hover:bg-[#d6a430] transition font-bold">作成</button>
