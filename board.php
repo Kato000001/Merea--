@@ -100,8 +100,8 @@ if (!isset($_SESSION['user_id'])) {
 
     <input type="file" id="file-input" accept="image/png, image/jpeg, image/gif" class="hidden" multiple>
 
-    <div id="trash-zone" class="absolute top-4 right-4 w-16 h-16 bg-red-500 text-white flex items-center justify-center rounded-full opacity-0 pointer-events-none transition-opacity duration-300 z-40 flex-col shadow-lg">
-        <span class="text-2xl">🗑️</span>
+    <div id="trash-zone" class="absolute top-4 right-4 w-24 h-24 bg-red-500 text-white flex items-center justify-center rounded-full opacity-0 pointer-events-none transition-opacity duration-300 z-40 flex-col shadow-lg">
+        <span class="text-3xl">🗑️</span>
     </div>
 
     <div id="viewer-modal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center">

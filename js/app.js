@@ -46,10 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const existingCards = DOM.grid.querySelectorAll('.board-card');
         existingCards.forEach(card => card.remove());
 
-        const normalizedQuery = filterText.trim().toLowerCase();
+            // 変更後
+        const normalize = str => str.trim().toLowerCase().normalize('NFKC');
+        const normalizedQuery = normalize(filterText);
 
         boards.forEach(board => {
-            if (normalizedQuery && !board.title.toLowerCase().includes(normalizedQuery)) {
+            if (normalizedQuery && !normalize(board.title).includes(normalizedQuery)) {
                 return;
             }
 
