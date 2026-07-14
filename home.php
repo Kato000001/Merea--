@@ -113,21 +113,23 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
     </div>
+
     <!-- ④　リネームモーダル -->
     <div id="rename-modal" class="fixed inset-0 bg-black/70 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
-    <div class="bg-[#3A3A3A] p-6 rounded-2xl shadow-2xl w-96 border border-gray-700">
-        <h3 class="text-lg font-bold mb-4 text-[#EBB73E] flex items-center gap-2">
-            <i class="fa-solid fa-pen"></i> ボード名を変更  <!-- ①アイコンとテキスト -->
-        </h3>
-        <!-- ②警告テキストの代わりに入力欄 -->
-        <input type="text" id="rename-board-title" placeholder="新しい名前を入力..."
-            class="w-full bg-[#F3F4F6] text-gray-800 border-0 p-3 mb-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#EBB73E] font-medium">
-        <div class="flex justify-end gap-3">
-            <button id="rename-cancel-btn" class="px-4 py-2 bg-gray-600 text-gray-200 rounded-xl hover:bg-gray-500 transition font-medium">キャンセル</button>
-            <button id="rename-confirm-btn" class="px-4 py-2 bg-[#EBB73E] text-gray-950 rounded-xl hover:bg-[#d6a430] transition font-bold">変更する</button>  <!-- ③ボタンのid・色・テキスト -->
+        <div class="bg-[#3A3A3A] p-6 rounded-2xl shadow-2xl w-96 border border-gray-700">
+            <h3 class="text-lg font-bold mb-4 text-[#EBB73E] flex items-center gap-2">
+                <i class="fa-solid fa-pen"></i> ボード名を変更
+            </h3>
+            <input type="text" id="rename-board-title" placeholder="新しい名前を入力..."
+                class="w-full bg-[#F3F4F6] text-gray-800 border-0 p-3 mb-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#EBB73E] font-medium">
+            <p id="rename-error" class="text-red-400 text-sm mb-3 hidden"></p>
+            <div class="flex justify-end gap-3">
+                <button id="rename-cancel-btn" class="px-4 py-2 bg-gray-600 text-gray-200 rounded-xl hover:bg-gray-500 transition font-medium">キャンセル</button>
+                <button id="rename-confirm-btn" class="px-4 py-2 bg-[#EBB73E] text-gray-950 rounded-xl hover:bg-[#d6a430] transition font-bold">変更する</button>
+            </div>
         </div>
     </div>
-</div>
+
 <script>
 window.addEventListener('pageshow', function(event) {
     if (event.persisted) {

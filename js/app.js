@@ -235,7 +235,10 @@ DOM.menuRename.addEventListener('click', () => {
     DOM.renameBoardTitle.focus();
 });
 
-const closeRenameModal = () => DOM.renameModal.classList.add('hidden');
+const closeRenameModal = () => {
+    DOM.renameModal.classList.add('hidden');
+    document.getElementById('rename-error').classList.add('hidden');
+};
 DOM.renameCancelBtn.addEventListener('click', closeRenameModal);
 DOM.renameModal.addEventListener('click', (e) => {
     if (e.target === DOM.renameModal) closeRenameModal();
@@ -255,18 +258,19 @@ DOM.renameConfirmBtn.addEventListener('click', async () => {
         const data = await res.json();
 
         if (data.error) {
-            alert(data.error);
+            const errEl = document.getElementById('rename-error');
+            errEl.textContent = data.error;
+            errEl.classList.remove('hidden');
             return;
         }
 
+        closeRenameModal(); // ← 追加
         const board = boards.find(b => b.id === activeBoardId);
         if (board) board.title = newTitle;
         renderBoards(DOM.searchInput.value);
     } catch (err) {
         console.error('ボードリネームエラー:', err);
-    } finally {
-        closeRenameModal();
-    }
+    } 
 });
 
 

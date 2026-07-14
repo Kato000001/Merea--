@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db.php';
+require_once __DIR__ . '/db.php';
 
 header('Content-Type: application/json');
 
@@ -34,8 +34,18 @@ if (!$newTitle) {
     exit;
 }
 
+// 同名チェック（自分の別のボードと同じ名前でないか）
+$stmt = $pdo->prepare('SELECT id FROM boards WHERE user_id = ? AND name = ? AND id != ?');
+$stmt->execute([$userId, $newTitle, $boardId]);
+if ($stmt->fetch()) {
+    http_response_code(400);
+    echo json_encode(['error' => '同じ名前のボードが既に存在します']);
+    exit;
+}
+
 // 自分の持ち物のボードだけ削除できるようにする（user_idも条件に入れる）
 $stmt = $pdo->prepare('UPDATE boards SET name = ? WHERE id = ? AND user_id = ?');
 $stmt->execute([$newTitle, $boardId, $userId]);
 
 echo json_encode(['success' => true]);
+
