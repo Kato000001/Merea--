@@ -21,7 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
         renameModal: document.getElementById('rename-modal'),
         renameBoardTitle: document.getElementById('rename-board-title'),
         renameCancelBtn: document.getElementById('rename-cancel-btn'),
-        renameConfirmBtn: document.getElementById('rename-confirm-btn')
+        renameConfirmBtn: document.getElementById('rename-confirm-btn'),
+        menuTag: document.getElementById('menu-tag'),
+        tagModal: document.getElementById('tag-modal'),
+        tagList: document.getElementById('tag-list'),
+        tagNameInput: document.getElementById('tag-name-input'),
+        tagColorPicker: document.getElementById('tag-color-picker'),
+        tagCreateBtn: document.getElementById('tag-create-btn'),
+        tagModalCloseBtn: document.getElementById('tag-modal-close-btn'),
+        tagPopup: document.getElementById('tag-popup'),
+        tagPopupList: document.getElementById('tag-popup-list')
     };
 
     // --- ① DBからボード一覧を取得する ---
@@ -34,7 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             // DBのカラム名(name)をJS側で使っているtitleに合わせる
-            boards = data.map(b => ({ id: b.id, title: b.name }));
+            boards = data.map(b => ({
+                id: b.id,
+                title: b.name,
+                tags: b.tag_ids ? b.tag_ids.split(',').map((id, i) => ({
+                    id: id,
+                    name: b.tag_names.split(',')[i],
+                    color: b.tag_colors.split(',')[i]
+                })) : []
+            }));
             renderBoards();
         } catch (err) {
             console.error('ボード取得エラー:', err);
@@ -88,6 +105,19 @@ document.addEventListener('DOMContentLoaded', () => {
             infoArea.appendChild(kebabBtn);
             card.appendChild(infoArea);
 
+            if (board.tags.length > 0) {
+                const tagArea = document.createElement('div');
+                tagArea.className = 'flex gap-1 px-3 mt-1 flex-wrap';
+                board.tags.forEach(tag => {
+                    const badge = document.createElement('span');
+                    badge.className = 'text-xs px-2 py-0.5 rounded-full text-white font-medium';
+                    badge.style.backgroundColor = tag.color;
+                    badge.innerText = tag.name;
+                    tagArea.appendChild(badge);
+                });
+                card.appendChild(tagArea);
+            }
+
             card.addEventListener('click', () => {
                 window.location.href = `board.php?id=${board.id}`;
             });
@@ -139,8 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
             // 作成成功したらリストに追加
-            boards.push({ id: data.id, title: data.name });
-            renderBoards(DOM.searchInput.value);
+
+            await fetchBoards();
             closeCreateModal();
         } catch (err) {
             console.error('ボード作成エラー:', err);
@@ -216,8 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            boards = boards.filter(b => b.id !== activeBoardId);
-            renderBoards(DOM.searchInput.value);
+            await fetchBoards();
         } catch (err) {
             console.error('ボード削除エラー:', err);
         } finally {
@@ -265,9 +294,7 @@ DOM.renameConfirmBtn.addEventListener('click', async () => {
         }
 
         closeRenameModal(); // ← 追加
-        const board = boards.find(b => b.id === activeBoardId);
-        if (board) board.title = newTitle;
-        renderBoards(DOM.searchInput.value);
+        await fetchBoards();
     } catch (err) {
         console.error('ボードリネームエラー:', err);
     } 
@@ -290,8 +317,7 @@ DOM.menuDuplicate.addEventListener('click', async () => {
             alert(data.error);
             return;
         }
-        boards.push({ id: data.id, title: data.name });
-        renderBoards(DOM.searchInput.value);
+        await fetchBoards();
         DOM.kebabDropdown.classList.add('hidden');
     } catch (err) {
         console.error('ボード複製エラー:', err);

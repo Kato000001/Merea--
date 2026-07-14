@@ -51,7 +51,7 @@ if (!isset($_SESSION['user_id'])) {
 
     <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto px-4 py-10">
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10" id="board-grid">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10" id="board-grid">
             
             <!-- ① 新規ボード作成カード (常に先頭) -->
             <div class="flex flex-col group cursor-pointer" id="create-board-card">
@@ -73,16 +73,19 @@ if (!isset($_SESSION['user_id'])) {
 
     <!-- ケバブメニュー用のドロップダウン（使い回し用・隠し要素） -->
     <div id="kebab-dropdown" class="absolute hidden bg-[#2A2A2A] text-white rounded shadow-xl w-40 overflow-hidden z-50 border border-gray-700 py-1">
-        <button id="menu-rename" class="w-full text-left px-4 py-2 hover:bg-[#3A3A3A] transition text-sm flex items-center gap-2">
-            <i class="fa-solid fa-pen text-xs text-gray-400"></i> 名前変更
-        </button>
-        <button id="menu-duplicate" class="w-full text-left px-4 py-2 hover:bg-[#3A3A3A] transition text-sm flex items-center gap-2">
-            <i class="fa-solid fa-copy text-xs text-gray-400"></i> ボードを複製
-        </button>
-        <div class="border-t border-gray-700 my-1"></div>
-        <button id="menu-delete" class="w-full text-left px-4 py-2 hover:bg-red-600 hover:text-white transition text-sm flex items-center gap-2 text-red-400">
-            <i class="fa-solid fa-trash text-xs"></i> 削除
-        </button>
+    <button id="menu-rename" class="w-full text-left px-4 py-2 hover:bg-[#3A3A3A] transition text-sm flex items-center gap-2">
+        <i class="fa-solid fa-pen text-xs text-gray-400"></i> 名前変更
+    </button>
+    <button id="menu-duplicate" class="w-full text-left px-4 py-2 hover:bg-[#3A3A3A] transition text-sm flex items-center gap-2">
+        <i class="fa-solid fa-copy text-xs text-gray-400"></i> ボードを複製
+    </button>
+    <button id="menu-tag" class="w-full text-left px-4 py-2 hover:bg-[#3A3A3A] transition text-sm flex items-center gap-2">
+        <i class="fa-solid fa-tag text-xs text-gray-400"></i> タグを編集
+    </button>
+    <div class="border-t border-gray-700 my-1"></div>
+    <button id="menu-delete" class="w-full text-left px-4 py-2 hover:bg-red-600 hover:text-white transition text-sm flex items-center gap-2 text-red-400">
+        <i class="fa-solid fa-trash text-xs"></i> 削除
+    </button>
     </div>
 
     <!-- ② 新規作成時のモーダル -->
@@ -129,6 +132,45 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
     </div>
+
+<!-- ⑤ タグ管理モーダル -->
+<div id="tag-modal" class="fixed inset-0 bg-black/70 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-[#3A3A3A] p-6 rounded-2xl shadow-2xl w-[480px] border border-gray-700">
+        <h3 class="text-lg font-bold mb-4 text-[#EBB73E] flex items-center gap-2">
+            <i class="fa-solid fa-tag"></i> タグを管理
+        </h3>
+
+        <!-- タグ一覧 -->
+        <div id="tag-list" class="mb-4 flex flex-col gap-2 max-h-48 overflow-y-auto"></div>
+
+        <!-- タグ作成 -->
+        <div class="border-t border-gray-600 pt-4">
+            <p class="text-sm text-gray-400 mb-2">新しいタグを作成</p>
+            <div class="flex gap-2 items-center">
+                <input type="text" id="tag-name-input" placeholder="タグ名..." class="flex-1 bg-[#F3F4F6] text-gray-800 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EBB73E]">
+                <div class="flex gap-1" id="tag-color-picker">
+                    <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#EBB73E" data-color="#EBB73E"></button>
+                    <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#E05555" data-color="#E05555"></button>
+                    <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#55A855" data-color="#55A855"></button>
+                    <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#5588E0" data-color="#5588E0"></button>
+                    <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#9955E0" data-color="#9955E0"></button>
+                </div>
+                <button id="tag-create-btn" class="px-3 py-2 bg-[#EBB73E] text-gray-950 rounded-lg text-sm font-bold hover:bg-[#d6a430] transition">作成</button>
+            </div>
+        </div>
+
+        <div class="flex justify-end mt-4">
+            <button id="tag-modal-close-btn" class="px-4 py-2 bg-gray-600 text-gray-200 rounded-xl hover:bg-gray-500 transition font-medium">閉じる</button>
+        </div>
+    </div>
+</div>
+
+<!-- ⑥ タグ付けポップアップ -->
+<div id="tag-popup" class="absolute hidden bg-[#2A2A2A] text-white rounded-xl shadow-xl w-48 overflow-hidden z-50 border border-gray-700 p-2">
+    <p class="text-xs text-gray-400 mb-2 px-2">タグを選択</p>
+    <div id="tag-popup-list" class="flex flex-col gap-1"></div>
+</div>
+
 
 <script>
 window.addEventListener('pageshow', function(event) {
