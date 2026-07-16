@@ -82,6 +82,16 @@ foreach ($cards as $card) {
     }
 }
 
+// タグもコピー
+$stmt = $pdo->prepare('SELECT tag_id FROM board_tags WHERE board_id = ?');
+$stmt->execute([$boardId]);
+$boardTags = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($boardTags as $boardTag) {
+    $stmt = $pdo->prepare('INSERT INTO board_tags (board_id, tag_id) VALUES (?, ?)');
+    $stmt->execute([$newId, $boardTag['tag_id']]);
+}
+
 echo json_encode([
     'success' => true,
     'id' => $newId,

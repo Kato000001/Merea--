@@ -78,6 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const thumb = document.createElement('div');
             thumb.className = 'w-full aspect-square bg-[#3A3A3A] rounded-[2rem] overflow-hidden transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-xl shadow-md relative flex items-center justify-center border border-gray-700';
+            
+
 
             const initial = document.createElement('div');
             initial.className = 'text-gray-400 font-bold text-2xl group-hover:text-[#EBB73E] transition-colors duration-200';
@@ -124,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             DOM.grid.appendChild(card);
         });
-
         if (normalizedQuery) {
             DOM.createCard.style.display = 'none';
         } else {
@@ -185,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ケバブメニュー（リネーム・複製・削除はまだDB未対応） ---
     function openKebabMenu(e, boardId) {
         activeBoardId = boardId;
-        const rect = e.currentTarget.getBoundingClientRect();
+        const rect = e.target.getBoundingClientRect();
         DOM.kebabDropdown.style.top = `${window.scrollY + rect.bottom + 5}px`;
         DOM.kebabDropdown.style.left = `${window.scrollX + rect.left - 120}px`;
         DOM.kebabDropdown.classList.remove('hidden');
@@ -196,20 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             DOM.kebabDropdown.classList.add('hidden');
         }
     });
-// --- ケバブメニュー（リネーム・複製・削除はまだDB未対応） ---
-    function openKebabMenu(e, boardId) {
-        activeBoardId = boardId;
-        const rect = e.currentTarget.getBoundingClientRect();
-        DOM.kebabDropdown.style.top = `${window.scrollY + rect.bottom + 5}px`;
-        DOM.kebabDropdown.style.left = `${window.scrollX + rect.left - 120}px`;
-        DOM.kebabDropdown.classList.remove('hidden');
-    }
 
-    document.addEventListener('click', (e) => {
-        if (!DOM.kebabDropdown.contains(e.target)) {
-            DOM.kebabDropdown.classList.add('hidden');
-        }
-    });
 
     // --- ここから追加 ---
 
@@ -324,7 +312,142 @@ DOM.menuDuplicate.addEventListener('click', async () => {
     } 
 });
 
+// --- タグ管理 ---
+let tags = [];
+let selectedColor = '#EBB73E';
+
+// タグ一覧を取得
+async function fetchTags() {
+    const res = await fetch('php/tags_list.php');
+    tags = await res.json();
+}
+
+// タグ管理モーダルを開く
+async function openTagModal() {
+    await fetchTags();
+    renderTagList();
+    DOM.tagModal.classList.remove('hidden');
+}
+
+const closeTagModal = () => DOM.tagModal.classList.add('hidden');
+DOM.tagModalCloseBtn.addEventListener('click', closeTagModal);
+DOM.tagModal.addEventListener('click', (e) => {
+    if (e.target === DOM.tagModal) closeTagModal();
+});
+
+// タグ一覧をレンダリング
+function renderTagList() {
+    DOM.tagList.innerHTML = '';
+    const currentBoard = boards.find(b => b.id === activeBoardId);
+    const currentTagIds = currentBoard ? currentBoard.tags.map(t => String(t.id)) : [];
+
+    tags.forEach(tag => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-2 p-2 bg-[#2A2A2A] rounded-lg';
+
+        const dot = document.createElement('span');
+        dot.className = 'w-4 h-4 rounded-full flex-shrink-0';
+        dot.style.backgroundColor = tag.color;
+
+        const name = document.createElement('span');
+        name.className = 'flex-1 text-sm text-white';
+        name.innerText = tag.name;
+
+        const isActive = currentTagIds.includes(String(tag.id));
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = isActive
+            ? 'text-xs px-2 py-1 bg-[#EBB73E] text-gray-950 rounded font-bold'
+            : 'text-xs px-2 py-1 bg-gray-600 text-gray-200 rounded';
+        toggleBtn.innerText = isActive ? '付いている ✓' : '付ける';
+        toggleBtn.addEventListener('click', async () => {
+            const action = isActive ? 'remove' : 'add';
+            await fetch('php/boards_set_tag.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ board_id: activeBoardId, tag_id: tag.id, action })
+            });
+            await fetchBoards();
+            await fetchTags();
+            renderTagList();
+        });
+
+        row.appendChild(dot);
+        row.appendChild(name);
+        row.appendChild(toggleBtn);
+        DOM.tagList.appendChild(row);
+    });
+}
+
+// 色選択
+DOM.tagColorPicker.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        selectedColor = btn.dataset.color;
+        DOM.tagColorPicker.querySelectorAll('button').forEach(b => b.style.borderColor = 'transparent');
+        btn.style.borderColor = 'white';
+    });
+});
+
+// タグ作成
+DOM.tagCreateBtn.addEventListener('click', async () => {
+    const name = DOM.tagNameInput.value.trim();
+    if (!name) return;
+    await fetch('php/tags_create.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, color: selectedColor })
+    });
+    DOM.tagNameInput.value = '';
+    await fetchTags();
+    renderTagList();
+});
+
+// ケバブメニューの「タグを編集」
+DOM.menuTag.addEventListener('click', () => {
+    DOM.kebabDropdown.classList.add('hidden');
+    openTagModal();
+});
+
+// タグポップアップ（ボードへのタグ付け）
+async function openTagPopup(e, boardId) {
+    e.stopPropagation();
+    activeBoardId = boardId;
+    await fetchTags();
+
+    DOM.tagPopupList.innerHTML = '';
+    const currentBoard = boards.find(b => b.id === boardId);
+    const currentTagIds = currentBoard ? currentBoard.tags.map(t => t.id) : [];
+
+    tags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full text-left px-3 py-1.5 text-sm rounded-lg flex items-center gap-2 hover:bg-[#3A3A3A] transition';
+        const isActive = currentTagIds.includes(String(tag.id));
+        btn.innerHTML = `<span class="w-3 h-3 rounded-full" style="background:${tag.color}"></span>${tag.name}${isActive ? ' ✓' : ''}`;
+        btn.addEventListener('click', async () => {
+            const action = isActive ? 'remove' : 'add';
+            await fetch('php/boards_set_tag.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ board_id: boardId, tag_id: tag.id, action })
+            });
+            DOM.tagPopup.classList.add('hidden');
+            await fetchBoards();
+        });
+        DOM.tagPopupList.appendChild(btn);
+    });
+
+    const rect = e.target.getBoundingClientRect();
+    DOM.tagPopup.style.top = `${window.scrollY + rect.bottom + 5}px`;
+    DOM.tagPopup.style.left = `${window.scrollX + rect.left}px`;
+    DOM.tagPopup.classList.remove('hidden');
+}
+
+document.addEventListener('click', (e) => {
+    if (!DOM.tagPopup.contains(e.target)) {
+        DOM.tagPopup.classList.add('hidden');
+    }
+});
 
     // --- 初期実行：DBから一覧取得 ---
     fetchBoards();
 });
+

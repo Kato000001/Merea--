@@ -54,6 +54,9 @@ $stmt->execute([$boardId]);
 $stmt = $pdo->prepare('DELETE FROM cards WHERE board_id = ?');
 $stmt->execute([$boardId]);
 
+$stmt = $pdo->prepare('DELETE FROM board_tags WHERE board_id = ?');
+$stmt->execute([$boardId]);
+
 $stmt = $pdo->prepare('DELETE FROM boards WHERE id = ? AND user_id = ?');
 $stmt->execute([$boardId, $userId]);
 

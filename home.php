@@ -140,6 +140,10 @@ if (!isset($_SESSION['user_id'])) {
             <i class="fa-solid fa-tag"></i> タグを管理
         </h3>
 
+    <!-- タグ付け -->
+        <p class="text-sm text-gray-400 mb-2">このボードのタグ</p>
+        <div id="tag-list" class="mb-4 flex flex-col gap-2 max-h-48 overflow-y-auto"></div>
+
         <!-- タグ一覧 -->
         <div id="tag-list" class="mb-4 flex flex-col gap-2 max-h-48 overflow-y-auto"></div>
 
