@@ -133,21 +133,14 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 
-<!-- ⑤ タグ管理モーダル -->
+    <!-- ⑤ タグ管理モーダル -->
 <div id="tag-modal" class="fixed inset-0 bg-black/70 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
     <div class="bg-[#3A3A3A] p-6 rounded-2xl shadow-2xl w-[480px] border border-gray-700">
         <h3 class="text-lg font-bold mb-4 text-[#EBB73E] flex items-center gap-2">
             <i class="fa-solid fa-tag"></i> タグを管理
         </h3>
-
-    <!-- タグ付け -->
         <p class="text-sm text-gray-400 mb-2">このボードのタグ</p>
         <div id="tag-list" class="mb-4 flex flex-col gap-2 max-h-48 overflow-y-auto"></div>
-
-        <!-- タグ一覧 -->
-        <div id="tag-list" class="mb-4 flex flex-col gap-2 max-h-48 overflow-y-auto"></div>
-
-        <!-- タグ作成 -->
         <div class="border-t border-gray-600 pt-4">
             <p class="text-sm text-gray-400 mb-2">新しいタグを作成</p>
             <div class="flex gap-2 items-center">
@@ -162,19 +155,36 @@ if (!isset($_SESSION['user_id'])) {
                 <button id="tag-create-btn" class="px-3 py-2 bg-[#EBB73E] text-gray-950 rounded-lg text-sm font-bold hover:bg-[#d6a430] transition">作成</button>
             </div>
         </div>
-
         <div class="flex justify-end mt-4">
             <button id="tag-modal-close-btn" class="px-4 py-2 bg-gray-600 text-gray-200 rounded-xl hover:bg-gray-500 transition font-medium">閉じる</button>
         </div>
     </div>
 </div>
 
-<!-- ⑥ タグ付けポップアップ -->
-<div id="tag-popup" class="absolute hidden bg-[#2A2A2A] text-white rounded-xl shadow-xl w-48 overflow-hidden z-50 border border-gray-700 p-2">
-    <p class="text-xs text-gray-400 mb-2 px-2">タグを選択</p>
-    <div id="tag-popup-list" class="flex flex-col gap-1"></div>
+<!-- ⑦ タグ編集モーダル -->
+<div id="tag-edit-modal" class="fixed inset-0 bg-black/50 z-[110] hidden flex items-center justify-center">
+    <div class="bg-[#3A3A3A] p-6 rounded-2xl shadow-2xl w-80 border border-gray-700">
+        <h3 class="text-lg font-bold mb-4 text-[#EBB73E] flex items-center gap-2">
+            <i class="fa-solid fa-pen"></i> タグを編集
+        </h3>
+        <input type="text" id="tag-edit-name" placeholder="タグ名..." 
+            class="w-full bg-[#F3F4F6] text-gray-800 p-2 rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-[#EBB73E]">
+        <div class="flex gap-1 mb-4" id="tag-edit-color-picker">
+            <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#EBB73E" data-color="#EBB73E"></button>
+            <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#E05555" data-color="#E05555"></button>
+            <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#55A855" data-color="#55A855"></button>
+            <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#5588E0" data-color="#5588E0"></button>
+            <button class="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition" style="background:#9955E0" data-color="#9955E0"></button>
+        </div>
+        <div class="flex justify-between">
+            <button id="tag-edit-delete-btn" class="px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition">削除</button>
+            <div class="flex gap-2">
+                <button id="tag-edit-cancel-btn" class="px-3 py-2 bg-gray-600 text-gray-200 rounded-lg text-sm hover:bg-gray-500 transition">キャンセル</button>
+                <button id="tag-edit-save-btn" class="px-3 py-2 bg-[#EBB73E] text-gray-950 rounded-lg text-sm font-bold hover:bg-[#d6a430] transition">保存</button>
+            </div>
+        </div>
+    </div>
 </div>
-
 
 <script>
 window.addEventListener('pageshow', function(event) {

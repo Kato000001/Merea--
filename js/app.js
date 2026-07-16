@@ -30,7 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
         tagCreateBtn: document.getElementById('tag-create-btn'),
         tagModalCloseBtn: document.getElementById('tag-modal-close-btn'),
         tagPopup: document.getElementById('tag-popup'),
-        tagPopupList: document.getElementById('tag-popup-list')
+        tagPopupList: document.getElementById('tag-popup-list'),
+        tagEditModal: document.getElementById('tag-edit-modal'),
+        tagEditName: document.getElementById('tag-edit-name'),
+        tagEditColorPicker: document.getElementById('tag-edit-color-picker'),
+        tagEditDeleteBtn: document.getElementById('tag-edit-delete-btn'),
+        tagEditCancelBtn: document.getElementById('tag-edit-cancel-btn'),
+        tagEditSaveBtn: document.getElementById('tag-edit-save-btn')
     };
 
     // --- ① DBからボード一覧を取得する ---
@@ -405,6 +411,51 @@ DOM.tagCreateBtn.addEventListener('click', async () => {
 DOM.menuTag.addEventListener('click', () => {
     DOM.kebabDropdown.classList.add('hidden');
     openTagModal();
+});
+
+// タグ編集モーダル
+let editingTagId = null;
+let editingTagColor = '#EBB73E';
+
+const closeTagEditModal = () => DOM.tagEditModal.classList.add('hidden');
+DOM.tagEditCancelBtn.addEventListener('click', closeTagEditModal);
+
+// 色選択（編集モーダル）
+DOM.tagEditColorPicker.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        editingTagColor = btn.dataset.color;
+        DOM.tagEditColorPicker.querySelectorAll('button').forEach(b => b.style.borderColor = 'transparent');
+        btn.style.borderColor = 'white';
+    });
+});
+
+// 保存
+DOM.tagEditSaveBtn.addEventListener('click', async () => {
+    const name = DOM.tagEditName.value.trim();
+    if (!name || !editingTagId) return;
+    await fetch('php/tags_update.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingTagId, name, color: editingTagColor })
+    });
+    closeTagEditModal();
+    await fetchTags();
+    renderTagList();
+    await fetchBoards();
+});
+
+// 削除
+DOM.tagEditDeleteBtn.addEventListener('click', async () => {
+    if (!editingTagId) return;
+    await fetch('php/tags_delete.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingTagId })
+    });
+    closeTagEditModal();
+    await fetchTags();
+    renderTagList();
+    await fetchBoards();
 });
 
 // タグポップアップ（ボードへのタグ付け）
