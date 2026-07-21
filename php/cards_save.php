@@ -20,14 +20,15 @@ $input = json_decode(file_get_contents('php://input'), true);
 $cardId = $input['card_id'] ?? null;
 $x = $input['x'] ?? null;
 $y = $input['y'] ?? null;
+$z = $input['z'] ?? 0;
 
-if (!$cardId || $x === null || $y === null) {
+if (!$cardId || $x === null || $y === null || $z === null) {
     http_response_code(400);
     echo json_encode(['error' => 'パラメータが不足しています']);
     exit;
 }
 
-$stmt = $pdo->prepare('UPDATE cards SET pos_x = ?, pos_y = ? WHERE id = ?');
-$stmt->execute([$x, $y, $cardId]);
+$stmt = $pdo->prepare('UPDATE cards SET pos_x = ?, pos_y = ?, z_index = ? WHERE id = ?');
+$stmt->execute([$x, $y, $z, $cardId]);
 
 echo json_encode(['success' => true]);

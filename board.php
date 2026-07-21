@@ -264,7 +264,7 @@ DOM.urlConfirmBtn.addEventListener('click', async () => {
 });
 
          // --- カード生成ロジック ---
-            function createCard(type, content, cardId = null, x = null, y = null) {
+            function createCard(type, content, cardId = null, x = null, y = null,z = 0) {
         const card = document.createElement('div');
         card.className = 'card';
         card.dataset.cardId = cardId;
@@ -399,11 +399,11 @@ async function loadCards() {
 
     cards.forEach(card => {
     if (card.type === 'image') {
-        createCard('image', card.file_path, card.id, card.pos_x, card.pos_y);
+        createCard('image', card.file_path, card.id, card.pos_x, card.pos_y, card.z_index);
     } else if (card.type === 'text') {
-        createCard('text', card.content, card.id, card.pos_x, card.pos_y);
+        createCard('text', card.content, card.id, card.pos_x, card.pos_y, card.z_index);
     } else if (card.type === 'url') {
-        createCard('url', { url: card.url, title: card.title, thumbnail: card.thumbnail_url }, card.id, card.pos_x, card.pos_y);
+        createCard('url', { url: card.url, title: card.title, thumbnail: card.thumbnail_url }, card.id, card.pos_x, card.pos_y, card.z_index);
     }
 });
 }
@@ -473,11 +473,12 @@ loadCards();
             const cardId = state.draggingCard.dataset.cardId;
             const x = parseFloat(state.draggingCard.style.left);
             const y = parseFloat(state.draggingCard.style.top);
+            const z = parseInt(state.draggingCard.style.zIndex) || 0;
             if (cardId) {
                 await fetch('php/cards_save.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ card_id: cardId, x, y })
+                    body: JSON.stringify({ card_id: cardId, x, y, z })
                 });
             }
         }
