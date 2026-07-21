@@ -66,78 +66,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- ボード一覧のレンダリング ---
     function renderBoards(filterText = '') {
-        const existingCards = DOM.grid.querySelectorAll('.board-card');
-        existingCards.forEach(card => card.remove());
+    const existingCards = DOM.grid.querySelectorAll('.board-card');
+    existingCards.forEach(card => card.remove());
 
-            // 変更後
-        const normalize = str => str.trim().toLowerCase().normalize('NFKC');
-        const normalizedQuery = normalize(filterText);
+    const normalize = str => str.trim().toLowerCase().normalize('NFKC');
+    const normalizedQuery = normalize(filterText);
 
-        boards.forEach(board => {
-            if (normalizedQuery && !normalize(board.title).includes(normalizedQuery)) {
-                return;
-            }
-
-            const card = document.createElement('div');
-            card.className = 'flex flex-col group cursor-pointer board-card';
-            card.dataset.id = board.id;
-
-            const thumb = document.createElement('div');
-            thumb.className = 'w-full aspect-square bg-[#3A3A3A] rounded-[2rem] overflow-hidden transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-xl shadow-md relative flex items-center justify-center border border-gray-700';
-            
-
-
-            const initial = document.createElement('div');
-            initial.className = 'text-gray-400 font-bold text-2xl group-hover:text-[#EBB73E] transition-colors duration-200';
-            initial.innerText = board.title.charAt(0) || 'B';
-            thumb.appendChild(initial);
-            card.appendChild(thumb);
-
-            const infoArea = document.createElement('div');
-            infoArea.className = 'mt-3 flex justify-between items-center w-full px-3';
-
-            const titleSpan = document.createElement('span');
-            titleSpan.className = 'text-sm font-medium tracking-wide truncate board-title-text';
-            titleSpan.innerText = board.title;
-            infoArea.appendChild(titleSpan);
-
-            const kebabBtn = document.createElement('button');
-            kebabBtn.className = 'text-gray-400 hover:text-white p-3 menu-btn';
-            kebabBtn.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>';
-
-            kebabBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openKebabMenu(e, board.id);
-            });
-
-            infoArea.appendChild(kebabBtn);
-            card.appendChild(infoArea);
-
-            if (board.tags.length > 0) {
-                const tagArea = document.createElement('div');
-                tagArea.className = 'flex gap-1 px-3 mt-1 flex-wrap';
-                board.tags.forEach(tag => {
-                    const badge = document.createElement('span');
-                    badge.className = 'text-xs px-2 py-0.5 rounded-full text-white font-medium';
-                    badge.style.backgroundColor = tag.color;
-                    badge.innerText = tag.name;
-                    tagArea.appendChild(badge);
-                });
-                card.appendChild(tagArea);
-            }
-
-            card.addEventListener('click', () => {
-                window.location.href = `board.php?id=${board.id}`;
-            });
-
-            DOM.grid.appendChild(card);
-        });
-        if (normalizedQuery) {
-            DOM.createCard.style.display = 'none';
-        } else {
-            DOM.createCard.style.display = 'flex';
+    boards.forEach(board => {
+        const titleMatch = normalize(board.title).includes(normalizedQuery);
+        const tagMatch = board.tags.some(t => normalize(t.name).includes(normalizedQuery));
+        if (normalizedQuery && !titleMatch && !tagMatch) {
+            return;
         }
+
+        const card = document.createElement('div');
+        card.className = 'flex flex-col group cursor-pointer board-card';
+        card.dataset.id = board.id;
+
+        const thumb = document.createElement('div');
+        thumb.className = 'w-full aspect-square bg-[#3A3A3A] rounded-[2rem] overflow-hidden transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-xl shadow-md relative flex items-center justify-center border border-gray-700';
+
+        const initial = document.createElement('div');
+        initial.className = 'text-gray-400 font-bold text-2xl group-hover:text-[#EBB73E] transition-colors duration-200';
+        initial.innerText = board.title.charAt(0) || 'B';
+        thumb.appendChild(initial);
+        card.appendChild(thumb);
+
+        const infoArea = document.createElement('div');
+        infoArea.className = 'mt-3 flex justify-between items-center w-full px-3';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'text-sm font-medium tracking-wide truncate board-title-text';
+        titleSpan.innerText = board.title;
+        infoArea.appendChild(titleSpan);
+
+        const kebabBtn = document.createElement('button');
+        kebabBtn.className = 'text-gray-400 hover:text-white p-3 menu-btn';
+        kebabBtn.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>';
+        kebabBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openKebabMenu(e, board.id);
+        });
+
+        infoArea.appendChild(kebabBtn);
+        card.appendChild(infoArea);
+
+        if (board.tags.length > 0) {
+            const tagArea = document.createElement('div');
+            tagArea.className = 'flex gap-1 px-3 mt-1 flex-wrap';
+            board.tags.forEach(tag => {
+                const badge = document.createElement('span');
+                badge.className = 'text-xs px-2 py-0.5 rounded-full text-white font-medium cursor-pointer hover:opacity-80 transition';
+                badge.style.backgroundColor = tag.color;
+                badge.innerText = tag.name;
+                });
+                tagArea.appendChild(badge);
+            card.appendChild(tagArea);
+        }
+
+        card.addEventListener('click', () => {
+            window.location.href = `board.php?id=${board.id}`;
+        });
+
+        DOM.grid.appendChild(card);
+    });
+
+    if (normalizedQuery) {
+        DOM.createCard.style.display = 'none';
+    } else {
+        DOM.createCard.style.display = 'flex';
     }
+
+
+
+
+
+    
 
     // --- 新規作成モーダルの制御 ---
     DOM.createCard.addEventListener('click', () => {
@@ -204,8 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-    // --- ここから追加 ---
 
     // --- 削除モーダルを開く ---
     DOM.menuDelete.addEventListener('click', () => {
@@ -377,9 +379,24 @@ function renderTagList() {
             renderTagList();
         });
 
-        row.appendChild(dot);
+
+const editBtn = document.createElement('button');
+editBtn.className = 'text-xs px-2 py-1 bg-gray-500 text-gray-200 rounded hover:bg-gray-400';
+editBtn.innerText = '編集';
+editBtn.addEventListener('click', () => {
+    editingTagId = tag.id;
+    editingTagColor = tag.color;
+    DOM.tagEditName.value = tag.name;
+    DOM.tagEditColorPicker.querySelectorAll('button').forEach(b => {
+        b.style.borderColor = b.dataset.color === tag.color ? 'white' : 'transparent';
+    });
+    DOM.tagEditModal.classList.remove('hidden');
+});
+
+    row.appendChild(dot);
         row.appendChild(name);
         row.appendChild(toggleBtn);
+        row.appendChild(editBtn);
         DOM.tagList.appendChild(row);
     });
 }

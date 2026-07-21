@@ -20,4 +20,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'パスワードが正しくありません';
     }
 }
-?>s
+?>

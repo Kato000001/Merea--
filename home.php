@@ -161,6 +161,12 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 </div>
 
+<!-- ⑥ タグ付けポップアップ -->
+<div id="tag-popup" class="absolute hidden bg-[#2A2A2A] text-white rounded-xl shadow-xl w-48 overflow-hidden z-50 border border-gray-700 p-2">
+    <p class="text-xs text-gray-400 mb-2 px-2">タグを選択</p>
+    <div id="tag-popup-list" class="flex flex-col gap-1"></div>
+</div>
+
 <!-- ⑦ タグ編集モーダル -->
 <div id="tag-edit-modal" class="fixed inset-0 bg-black/50 z-[110] hidden flex items-center justify-center">
     <div class="bg-[#3A3A3A] p-6 rounded-2xl shadow-2xl w-80 border border-gray-700">
