@@ -116,11 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
             tagArea.className = 'flex gap-1 px-3 mt-1 flex-wrap';
             board.tags.forEach(tag => {
                 const badge = document.createElement('span');
-                badge.className = 'text-xs px-2 py-0.5 rounded-full text-white font-medium cursor-pointer hover:opacity-80 transition';
+                badge.className = 'text-xs px-2 py-0.5 rounded-full text-white font-medium';
                 badge.style.backgroundColor = tag.color;
                 badge.innerText = tag.name;
-                });
                 tagArea.appendChild(badge);
+            });
             card.appendChild(tagArea);
         }
 
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         DOM.createCard.style.display = 'flex';
     }
-
+}
 
 
 
