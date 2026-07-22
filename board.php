@@ -273,6 +273,8 @@ DOM.urlConfirmBtn.addEventListener('click', async () => {
         const posY = y !== null ? y : (window.innerHeight / 2) - state.canvasY - 100;
         card.style.left = `${posX}px`;
         card.style.top = `${posY}px`;
+        card.style.zIndex = z;  // ← 追加
+
 
         if (type === 'image') {
             const img = document.createElement('img');
@@ -332,28 +334,29 @@ DOM.urlConfirmBtn.addEventListener('click', async () => {
 
 
 
-        function startCardDrag(e) {
-            if (e.button !== 0) return;
-            
-            const now = Date.now();
-            if (now - (e.currentTarget._lastClick || 0) < 300) {
-                e.currentTarget._lastClick = 0;
-                return;
-            }
-            e.currentTarget._lastClick = now;
+        // startCardDragを差し替え
+            function startCardDrag(e) {
+                if (e.button !== 0) return;
+                
+                const now = Date.now();
+                if (now - (e.currentTarget._lastClick || 0) < 300) {
+                    e.currentTarget._lastClick = 0;
+                    return;
+                }
+                e.currentTarget._lastClick = now;
 
-            state.draggingCard = e.currentTarget;
-            
-            // クリックしたカードを最前面に
-            document.querySelectorAll('.card').forEach(c => c.style.zIndex = '1');
-            state.draggingCard.style.zIndex = '10';
-            
-            const rect = state.draggingCard.getBoundingClientRect();
-            state.startX = e.clientX - rect.left;
-            state.startY = e.clientY - rect.top;
-            
-            DOM.trashZone.style.opacity = '1';
-            e.stopPropagation();
+                state.draggingCard = e.currentTarget;
+                
+                // 現在の最大z_indexを取得して+1する
+                const maxZ = Math.max(...Array.from(document.querySelectorAll('.card')).map(c => parseInt(c.style.zIndex) || 0));
+                state.draggingCard.style.zIndex = maxZ + 1;
+                
+                const rect = state.draggingCard.getBoundingClientRect();
+                state.startX = e.clientX - rect.left;
+                state.startY = e.clientY - rect.top;
+                
+                DOM.trashZone.style.opacity = '1';
+                e.stopPropagation();
 }
 
         window.addEventListener('pointermove', (e) => {

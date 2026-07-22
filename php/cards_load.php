@@ -25,7 +25,7 @@ $stmt = $pdo->prepare('
     LEFT JOIN card_images ci ON c.id = ci.card_id
     LEFT JOIN card_urls cu ON c.id = cu.card_id
     WHERE c.board_id = ?
-    ORDER BY c.created_at ASC
+    ORDER BY c.z_index ASC, c.created_at ASC
 ');
 $stmt->execute([$boardId]);
 $cards = $stmt->fetchAll(PDO::FETCH_ASSOC);
